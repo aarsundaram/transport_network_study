@@ -1,0 +1,10 @@
+name: roads_shiny_app
+title:
+username:
+account: aarsundaram
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3256991
+bundleId: 3875645
+url: https://aarsundaram.shinyapps.io/roads_shiny_app/
+when: 1605697115.40012

@@ -3,9 +3,12 @@ library(shiny)
 library(leaflet)
 library(sf)
 library(dplyr)
+library(shiny)
 
-#filepath=getwd()
-#setwd(filepath)
+#runGitHub( "transport_network_study", "aarsundaram")
+
+filepath=getwd()
+setwd(filepath)
 
 ###Load your data: 
 
@@ -19,7 +22,7 @@ ui <- shinyUI(fluidPage(
   
   sidebarPanel(
     htmlOutput("bridge_road_selector")# from objects created in server
-      ),
+  ),
   
   
   mainPanel(
@@ -39,7 +42,7 @@ ui <- shinyUI(fluidPage(
 
 # Define server logic required to draw a histogram
 server <- shinyServer(function(input, output) {
-
+  
   
   output$bridge_road_selector = renderUI({ #creates State select box object called in ui
     selectInput(inputId = "bridge_road", #name of input
@@ -51,40 +54,40 @@ server <- shinyServer(function(input, output) {
   })
   
   
-    mydata <- eventReactive(input$bridge_road, {bridges[bridges$road == input$bridge_road,]})
-    ## table output for criticality 
-    output$mytable <- renderTable({
-      sortedtable <- top_n(mydata(),10,mydata()$CriticalityScore)
-
-      to_return <- sortedtable %>% select('road','name','condition','zone')
-      return(to_return)
-    })
+  mydata <- eventReactive(input$bridge_road, {bridges[bridges$road == input$bridge_road,]})
+  ## table output for criticality 
+  output$mytable <- renderTable({
+    sortedtable <- top_n(mydata(),10,mydata()$CriticalityScore)
     
-    ## table output for vulnerability
-    output$mytable2 <- renderTable({
-      sortedtable2 <- top_n(mydata(),10,mydata()$VulnerabilityScore)
+    to_return <- sortedtable %>% select('road','name','condition','zone')
+    return(to_return)
+  })
+  
+  ## table output for vulnerability
+  output$mytable2 <- renderTable({
+    sortedtable2 <- top_n(mydata(),10,mydata()$VulnerabilityScore)
+    
+    to_return2 <- sortedtable2 %>% select('road','name','condition','zone')
+    return(to_return2)
+  })
+  
+  #map to show road segments:
+  
+  output$mymap <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(providers$Stamen.TonerLite,
+                       options = providerTileOptions(noWrap = TRUE)
+      ) %>%
       
-      to_return2 <- sortedtable2 %>% select('road','name','condition','zone')
-      return(to_return2)
-    })
+      addMarkers(mydata(),lng= mydata()$lon,lat = mydata()$lat, popup = paste("Condition: ",mydata()$condition, "<br/>","Zone: ", mydata()$zone) )
     
-    #map to show road segments:
-    
-    output$mymap <- renderLeaflet({
-      leaflet() %>%
-        addProviderTiles(providers$Stamen.TonerLite,
-                         options = providerTileOptions(noWrap = TRUE)
-        ) %>%
-        
-        addMarkers(mydata(),lng= mydata()$lon,lat = mydata()$lat, popup = paste("Condition: ",mydata()$condition, "<br/>","Zone: ", mydata()$zone) )
-        
-    })
-    
-    
-    
+  })
+  
+  
+  
 })   
-  
-  
+
+
 
 
 # Run the application 
